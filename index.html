@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Private Banking Field Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a1628;
+    --navy-mid: #0f2040;
+    --navy-light: #1a3060;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --gold-pale: #f5e8c8;
+    --cream: #faf7f0;
+    --text: #1a1a2e;
+    --text-muted: #5a6080;
+    --white: #ffffff;
+    --border: rgba(201,168,76,0.2);
+    --card-bg: #ffffff;
+    --sidebar-w: 280px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    display: flex;
+    min-height: 100vh;
+    font-size: 15px;
+  }
+
+  /* SIDEBAR */
+  #sidebar {
+    width: var(--sidebar-w);
+    background: var(--navy);
+    min-height: 100vh;
+    position: fixed;
+    left: 0; top: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    overflow-y: auto;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar-header {
+    padding: 32px 24px 20px;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+  }
+
+  .sidebar-logo {
+    font-family: 'Playfair Display', serif;
+    color: var(--gold);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .sidebar-title {
+    font-family: 'Playfair Display', serif;
+    color: var(--white);
+    font-size: 18px;
+    line-height: 1.3;
+  }
+
+  .sidebar-subtitle {
+    color: rgba(255,255,255,0.4);
+    font-size: 11px;
+    margin-top: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  .sidebar-nav {
+    padding: 16px 0;
+    flex: 1;
+  }
+
+  .nav-section-label {
+    color: rgba(201,168,76,0.6);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 16px 24px 6px;
+    font-weight: 500;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 24px;
+    cursor: pointer;
+    color: rgba(255,255,255,0.6);
+    font-size: 13px;
+    font-weight: 400;
+    transition: all 0.2s;
+    border-left: 2px solid transparent;
+    line-height: 1.3;
+  }
+
+  .nav-item:hover {
+    color: var(--white);
+    background: rgba(255,255,255,0.05);
+  }
+
+  .nav-item.active {
+    color: var(--gold-light);
+    border-left-color: var(--gold);
+    background: rgba(201,168,76,0.08);
+  }
+
+  .nav-item .nav-icon {
+    font-size: 14px;
+    width: 18px;
+    flex-shrink: 0;
+  }
+
+  .sidebar-progress {
+    padding: 20px 24px;
+    border-top: 1px solid rgba(201,168,76,0.15);
+  }
+
+  .progress-label {
+    color: rgba(255,255,255,0.4);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .progress-bar {
+    height: 2px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-count {
+    color: var(--gold);
+    font-size: 11px;
+    margin-top: 6px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* MAIN */
+  #main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    min-height: 100vh;
+    padding: 48px 52px;
+    max-width: calc(100vw - var(--sidebar-w));
+  }
+
+  .page { display: none; }
+  .page.active { display: block; animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* PAGE HEADER */
+  .page-header {
+    margin-bottom: 40px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .page-tag {
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+    margin-bottom: 10px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    color: var(--navy);
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+
+  .page-intro {
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 680px;
+  }
+
+  /* CARDS */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  .card {
+    background: var(--white);
+    border: 1px solid rgba(0,0,0,0.07);
+    border-radius: 12px;
+    padding: 24px;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card:hover {
+    border-color: var(--gold);
+    box-shadow: 0 4px 20px rgba(201,168,76,0.12);
+    transform: translateY(-1px);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .card:hover::before { opacity: 1; }
+
+  .card-icon { font-size: 24px; margin-bottom: 14px; }
+
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+
+  .card-body {
+    color: var(--text-muted);
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+
+  /* SECTIONS */
+  .section {
+    margin-bottom: 44px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+
+  .section-subtitle {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  /* PROSE */
+  .prose {
+    background: var(--white);
+    border: 1px solid rgba(0,0,0,0.07);
+    border-radius: 12px;
+    padding: 28px 32px;
+    line-height: 1.75;
+    color: var(--text);
+    font-size: 14.5px;
+  }
+
+  .prose h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--navy);
+    margin: 24px 0 10px;
+  }
+
+  .prose h3:first-child { margin-top: 0; }
+
+  .prose p { margin-bottom: 14px; }
+  .prose p:last-child { margin-bottom: 0; }
+
+  .prose strong { color: var(--navy); font-weight: 500; }
+
+  .prose ul {
+    margin: 10px 0 14px 0;
+    padding-left: 0;
+    list-style: none;
+  }
+
+  .prose ul li {
+    padding: 5px 0 5px 20px;
+    position: relative;
+    color: var(--text);
+    font-size: 14px;
+  }
+
+  .prose ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 14px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+
+  /* CALLOUT */
+  .callout {
+    background: linear-gradient(135deg, #fff9ee, #fffdf7);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 10px 10px 0;
+    padding: 16px 20px;
+    margin: 20px 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .callout-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+    margin-bottom: 6px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* TABLE */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--white);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.07);
+    font-size: 13.5px;
+  }
+
+  .data-table th {
+    background: var(--navy);
+    color: var(--gold-light);
+    padding: 13px 18px;
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 500;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .data-table td {
+    padding: 13px 18px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    color: var(--text);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: #fafaf8; }
+
+  /* PILL */
+  .pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+
+  .pill-gold { background: rgba(201,168,76,0.12); color: #9a7020; }
+  .pill-navy { background: rgba(10,22,40,0.08); color: var(--navy); }
+  .pill-green { background: rgba(20,150,80,0.1); color: #0a7040; }
+
+  /* SCENARIO CARD */
+  .scenario {
+    background: var(--white);
+    border: 1px solid rgba(0,0,0,0.07);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .scenario-header {
+    background: var(--navy);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .scenario-tag {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .scenario-title {
+    color: var(--white);
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .scenario-body {
+    padding: 20px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  .scenario-body strong { color: var(--navy); }
+
+  .response-block {
+    background: #f8fdf9;
+    border: 1px solid rgba(20,150,80,0.2);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-top: 12px;
+    font-size: 13.5px;
+    line-height: 1.65;
+  }
+
+  .response-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #0a7040;
+    font-weight: 600;
+    margin-bottom: 6px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* CHECKLIST */
+  .checklist {
+    list-style: none;
+    padding: 0;
+  }
+
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    font-size: 14px;
+    line-height: 1.5;
+    cursor: pointer;
+  }
+
+  .checklist li:last-child { border-bottom: none; }
+
+  .check-box {
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--gold);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .check-box.checked {
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+
+  .check-box.checked::after {
+    content: '✓';
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .check-text { flex: 1; }
+  .check-text.checked { text-decoration: line-through; color: var(--text-muted); }
+
+  /* MOBILE TOGGLE */
+  #menu-toggle {
+    display: none;
+    position: fixed;
+    top: 16px; left: 16px;
+    z-index: 200;
+    background: var(--navy);
+    color: var(--gold);
+    border: none;
+    width: 40px; height: 40px;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 99;
+  }
+
+  @media (max-width: 768px) {
+    #menu-toggle { display: flex; }
+    #sidebar { transform: translateX(-100%); }
+    #sidebar.open { transform: translateX(0); }
+    #overlay.open { display: block; }
+    #main { margin-left: 0; padding: 24px 20px; padding-top: 64px; max-width: 100vw; }
+    .page-title { font-size: 26px; }
+    .card-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<button id="menu-toggle" onclick="toggleSidebar()">☰</button>
+<div id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">Citi Private Bank</div>
+    <div class="sidebar-title">Associate Banker<br>Field Guide</div>
+    <div class="sidebar-subtitle">Wealth at Work · Professional Services</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Foundation</div>
+    <div class="nav-item active" onclick="showPage('overview')"><span class="nav-icon">◈</span>The Role & Mindset</div>
+    <div class="nav-item" onclick="showPage('clients')"><span class="nav-icon">◈</span>Your Clients</div>
+    <div class="nav-item" onclick="showPage('day')"><span class="nav-icon">◈</span>Day in the Life</div>
+
+    <div class="nav-section-label">Client Management</div>
+    <div class="nav-item" onclick="showPage('prospecting')"><span class="nav-icon">◈</span>Prospecting & Pipeline</div>
+    <div class="nav-item" onclick="showPage('discovery')"><span class="nav-icon">◈</span>Discovery & Needs Analysis</div>
+    <div class="nav-item" onclick="showPage('relationships')"><span class="nav-icon">◈</span>Deepening Relationships</div>
+
+    <div class="nav-section-label">Products & Solutions</div>
+    <div class="nav-item" onclick="showPage('banking')"><span class="nav-icon">◈</span>Banking & Lending</div>
+    <div class="nav-item" onclick="showPage('investments')"><span class="nav-icon">◈</span>Investments & Alternatives</div>
+    <div class="nav-item" onclick="showPage('planning')"><span class="nav-icon">◈</span>Wealth Planning</div>
+    <div class="nav-item" onclick="showPage('accounting')"><span class="nav-icon">◈</span>Accounting Firm Clients</div>
+
+    <div class="nav-section-label">Execution</div>
+    <div class="nav-item" onclick="showPage('scenarios')"><span class="nav-icon">◈</span>Real Client Scenarios</div>
+    <div class="nav-item" onclick="showPage('compliance')"><span class="nav-icon">◈</span>Compliance & Ethics</div>
+    <div class="nav-item" onclick="showPage('metrics')"><span class="nav-icon">◈</span>How You're Measured</div>
+  </nav>
+
+  <div class="sidebar-progress">
+    <div class="progress-label">Sections visited</div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:7%"></div></div>
+    <div class="progress-count" id="progress-count">1 / 14</div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main id="main">
+
+  <!-- OVERVIEW -->
+  <div class="page active" id="page-overview">
+    <div class="page-header">
+      <div class="page-tag">Module 01 · Foundation</div>
+      <div class="page-title">The Role & Mindset</div>
+      <div class="page-intro">Private banking is fundamentally a trust business. Before products, strategies, or credentials -- you are in the business of becoming the most trusted financial voice in a high-net-worth individual's life.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">What an Associate Banker Actually Does</div>
+      <div class="section-subtitle">The honest, unvarnished job description</div>
+      <div class="prose">
+        <h3>You are a relationship manager first</h3>
+        <p>An Associate Banker at Citi Private Bank is not a product specialist. You are a generalist relationship manager who understands enough about every product to know when a specialist is needed -- and who is trusted enough by clients to bring that specialist into the conversation. Your job is to hold the relationship, diagnose the need, and orchestrate the solution.</p>
+
+        <h3>The coverage model</h3>
+        <p>In the Wealth at Work division, you work within a coverage team that targets individuals whose wealth derives from their professional employment -- typically partners and senior executives at professional services firms (accounting, law, consulting, medicine). You cover a defined book of clients and prospects. Senior bankers carry larger books; as an Associate you support senior bankers and build your own relationships over time.</p>
+
+        <h3>What you're actually doing day to day</h3>
+        <ul>
+          <li>Calling and meeting with existing clients to understand what has changed in their financial lives</li>
+          <li>Identifying needs that the bank can address and connecting clients to specialists in investments, credit, planning, or trust</li>
+          <li>Preparing for and attending firm-level presentations at target accounting and law firms</li>
+          <li>Managing the pipeline -- tracking where each prospect is and what the next step is</li>
+          <li>Writing call reports and updating CRM after every meaningful interaction</li>
+          <li>Coordinating with internal specialists (Capital Advisory, Wealth Planning, Investment Counselors, Credit) to build and deliver solutions</li>
+          <li>Keeping current on your clients' firms -- are they being acquired, doing a merger, changing compensation structures?</li>
+        </ul>
+
+        <h3>The fundamental mindset shift</h3>
+        <p>Coming from financial planning or analysis, you are used to building models, finding answers, presenting conclusions. Private banking is different. The skill is in asking the right questions, listening with discipline, and then connecting what you hear to the capabilities of the bank. Clients do not always know what they need. They tell you symptoms -- "I have too much cash sitting around," "I'm worried about what happens when I retire from the firm" -- and your job is to hear the real problem behind that symptom.</p>
+
+        <div class="callout">
+          <div class="callout-label">Core Principle</div>
+          The best private bankers do not sell products. They solve problems. When a client trusts you completely, they call you before they make any major financial decision -- not after. That's the standard you are building toward.
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">The Private Banking Hierarchy</div>
+      <div class="section-subtitle">Who does what and how it connects to you</div>
+      <table class="data-table">
+        <thead><tr><th>Title</th><th>Primary Focus</th><th>Your Interaction</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Private Banker / Managing Director</strong></td><td>Owns the senior client relationships; brings in new institutional firm coverage</td><td>You support their book and learn their approach</td></tr>
+          <tr><td><strong>Associate Banker (you)</strong></td><td>Manages day-to-day client relationships; builds own pipeline; executes coverage</td><td>This is your role</td></tr>
+          <tr><td><strong>Investment Counselor</strong></td><td>Portfolio construction, manager selection, asset allocation conversations</td><td>You bring them in when client needs investment advice</td></tr>
+          <tr><td><strong>Capital Advisory (Credit)</strong></td><td>Structures lending solutions -- SBLs, mortgages, custom credit</td><td>You bring them in for any borrowing need</td></tr>
+          <tr><td><strong>Wealth Planning Specialist</strong></td><td>Estate structures, tax planning, philanthropy, trust design</td><td>You bring them in for planning conversations</td></tr>
+          <tr><td><strong>Alternatives Specialist</strong></td><td>Hedge funds, private equity, real assets, private credit</td><td>You bring them in for qualified clients wanting illiquid allocations</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title">The Three Things That Define a Great Banker</div>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">🤝</div>
+          <div class="card-title">Trustworthiness</div>
+          <div class="card-body">You do what you say. You call back when you said you would. You never recommend something that isn't right for the client. Clients are willing to fire bankers who betray their trust on a single transaction.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🧠</div>
+          <div class="card-title">Intellectual Curiosity</div>
+          <div class="card-body">You read broadly -- markets, tax law, the accounting profession, estate planning trends. Clients at this level expect their banker to know things they don't. Your knowledge is your credibility.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">⚡</div>
+          <div class="card-title">Urgency & Execution</div>
+          <div class="card-body">When a partner calls you with a problem, they expect speed. The difference between a good banker and a great one is often the follow-through -- not just knowing the answer, but getting it done.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLIENTS -->
+  <div class="page" id="page-clients">
+    <div class="page-header">
+      <div class="page-tag">Module 02 · Foundation</div>
+      <div class="page-title">Your Clients</div>
+      <div class="page-intro">Private banking clients are not a monolith. Understanding the psychology, financial profile, and specific concerns of different client types is essential to being effective from day one.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">The Wealth at Work Client Universe</div>
+      <div class="prose">
+        <h3>Who you are covering</h3>
+        <p>The Wealth at Work division targets professionals whose wealth is created through their employment or partnership, not through founding companies or inheriting fortunes. In the Professional Services Group specifically, your primary targets are partners and senior staff at accounting firms, law firms, consulting practices, and medical groups.</p>
+
+        <h3>The accounting firm partner in detail</h3>
+        <p>This is your bread and butter. A partner at a Big 4 or large regional accounting firm typically has the following financial profile:</p>
+        <ul>
+          <li><strong>Income:</strong> $500K to $5M+ annually, composed primarily of K-1 distributions from the partnership (not W-2 wages)</li>
+          <li><strong>Net worth:</strong> Concentrated in the firm's capital account (illiquid), personal real estate, and whatever outside savings they have accumulated</li>
+          <li><strong>Tax complexity:</strong> High. K-1 income, quarterly estimated taxes, state filings in multiple jurisdictions (because they travel for client work), potential AMT exposure</li>
+          <li><strong>Investment constraint:</strong> Independence rules from their firm and PCAOB/AICPA regulations restrict which publicly traded securities they can hold -- especially in audit clients or their sectors</li>
+          <li><strong>Retirement event:</strong> Mandatory retirement from the partnership at a defined age (typically 60-62), triggering a capital account payout -- often $1M to $5M -- that must be planned for</li>
+          <li><strong>Time poverty:</strong> Partners are extremely busy. They have a high tolerance for paying for quality advice and a very low tolerance for wasting time.</li>
+        </ul>
+
+        <div class="callout">
+          <div class="callout-label">Key Insight</div>
+          The independence constraint is your most powerful entry point. A Big 4 partner cannot manage their own portfolio -- their compliance team will flag prohibited securities. Discretionary management by Citi solves this problem completely. If you walk into a partner meeting and lead with this, you immediately show you understand their world.
+        </div>
+
+        <h3>Lawyers (for comparison)</h3>
+        <p>Law firm partners share many characteristics with accounting partners -- K-1 income, capital accounts, time poverty -- but typically do not have the same investment independence restrictions. They have broader portfolio freedom but similar planning complexity around firm transitions, draws, and retirement.</p>
+
+        <h3>Clients in liquidity transition</h3>
+        <p>Some of your most valuable clients are professionals in the middle of a wealth event: a partner who just retired and received their capital account payout, someone whose firm just merged and triggered a buyout, or a senior executive who just vested a large equity grant. These clients have an urgent need to deploy capital intelligently and are often emotionally overwhelmed. Speed and steadiness matter enormously here.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Client Segmentation by AUM</div>
+      <table class="data-table">
+        <thead><tr><th>Segment</th><th>Investable Assets</th><th>Typical Profile</th><th>Primary Needs</th></tr></thead>
+        <tbody>
+          <tr><td><span class="pill pill-gold">Core</span></td><td>$1M -- $5M</td><td>Senior manager, income partner, new equity partner</td><td>Investment management, basic planning, mortgage</td></tr>
+          <tr><td><span class="pill pill-navy">Core Plus</span></td><td>$5M -- $25M</td><td>Established equity partner</td><td>Full wealth management, SBL, trust structures, alternatives</td></tr>
+          <tr><td><span class="pill pill-green">Ultra HNW</span></td><td>$25M+</td><td>Senior partner, multi-firm equity holder, retired MP</td><td>Bespoke credit, estate optimization, philanthropy, full family office services</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Client Psychology: What They Actually Worry About</div>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">📉</div>
+          <div class="card-title">"Am I saving enough?"</div>
+          <div class="card-body">High earners often feel wealthy but have illiquid wealth (capital accounts, real estate) and limited liquid savings. The gap between what they earn and what they've accumulated is a source of anxiety they rarely voice directly.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🏛️</div>
+          <div class="card-title">"What happens at retirement?"</div>
+          <div class="card-body">The mandatory retirement cliff is psychologically heavy. A partner who has been defined by their work identity faces a forced transition with significant financial and personal stakes. This is an emotional conversation, not just a financial one.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">👪</div>
+          <div class="card-title">"What happens to my family?"</div>
+          <div class="card-body">Estate planning is driven by this question. What if I die before my mortgage is paid? What if I'm incapacitated? How do I transfer wealth to my children without creating dependency? These conversations unlock planning engagements.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔒</div>
+          <div class="card-title">"Am I compliant?"</div>
+          <div class="card-body">Accounting partners in particular are professionally risk-averse. The prospect of a pre-clearance violation or independence breach is terrifying. Solutions that remove compliance friction are not just convenient -- they are genuinely valued.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY IN THE LIFE -->
+  <div class="page" id="page-day">
+    <div class="page-header">
+      <div class="page-tag">Module 03 · Foundation</div>
+      <div class="page-title">Day in the Life</div>
+      <div class="page-intro">What your actual calendar looks like, how you structure your week, and the rhythms of the private banking year.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">A Typical Day</div>
+      <div class="prose">
+        <h3>Morning (7:30 -- 9:00 AM)</h3>
+        <p>Start by reviewing market moves overnight -- you need to know what the S&P did, whether there was a rate decision, any major macro news. Clients will ask. Then review your call list for the day and your CRM for any follow-ups due. If you have a presentation or meeting, you are reviewing your prep.</p>
+
+        <h3>Mid-morning (9:00 AM -- 12:00 PM)</h3>
+        <p>This is prime client contact time. You are making calls, following up on proposals, or attending firm presentations at target companies. If you are at a client meeting, you are in listening mode -- asking questions, uncovering needs, taking notes for the call report you will write afterward.</p>
+
+        <h3>Afternoon (1:00 -- 5:00 PM)</h3>
+        <p>Internal work: writing proposals, coordinating with specialists, updating the CRM, reviewing account performance for client reviews, working on credit applications with Capital Advisory. You may have a team meeting or pipeline review with your senior banker.</p>
+
+        <h3>Evening</h3>
+        <p>Client dinners and events are a regular feature of the job -- quarterly client events, firm-sponsored dinners, industry conferences. This is relationship maintenance work and should be approached as such, not as social obligation.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">The Private Banking Calendar Year</div>
+      <table class="data-table">
+        <thead><tr><th>Period</th><th>What's Happening</th><th>Your Focus</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Q1 (Jan--Mar)</strong></td><td>Year-end bonuses paid out at many firms; K-1s distributed; tax planning season begins</td><td>Outreach around liquidity events; connect clients to tax planning resources; IRA contribution conversations</td></tr>
+          <tr><td><strong>Q2 (Apr--Jun)</strong></td><td>Tax filing deadline; mid-year check-ins; spring real estate market</td><td>Mortgage and HELOC conversations; portfolio reviews; catch new partners promoted at fiscal year-end</td></tr>
+          <tr><td><strong>Q3 (Jul--Sep)</strong></td><td>Mid-year performance reviews at firms; partner meetings; slower summer pace</td><td>Relationship deepening; planning conversations; prospecting at firms with August fiscal year-end</td></tr>
+          <tr><td><strong>Q4 (Oct--Dec)</strong></td><td>Year-end tax loss harvesting; bonus season approaching; estate gifting deadlines</td><td>Tax-loss harvesting conversations; estate gifting (annual exclusion); end-of-year planning; pipeline reviews</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title">The Weekly Rhythm</div>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">📞</div>
+          <div class="card-title">Monday: Plan the week</div>
+          <div class="card-body">Review your pipeline, set your call targets for the week, identify any clients who triggered a need based on market events or firm news. Block time for proposals you need to write.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🤝</div>
+          <div class="card-title">Tue--Thu: Client-facing</div>
+          <div class="card-body">Bulk of meetings and calls. If you're at a firm event or presentation, it's usually Tuesday through Thursday. Any formal client reviews happen here. Pipeline conversations with your senior banker.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">📋</div>
+          <div class="card-title">Friday: Admin & prep</div>
+          <div class="card-body">CRM updates, call reports, proposal prep for next week, market reading, internal meetings. Use Friday afternoon to mentally process the week and write down what each client needs next.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROSPECTING -->
+  <div class="page" id="page-prospecting">
+    <div class="page-header">
+      <div class="page-tag">Module 04 · Client Management</div>
+      <div class="page-title">Prospecting & Pipeline</div>
+      <div class="page-intro">The pipeline is the engine of the business. You are always building it -- even when your book feels full. Understanding how to find, qualify, and advance prospects is foundational.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Where Clients Come From</div>
+      <div class="prose">
+        <h3>Firm-level partnerships</h3>
+        <p>The Wealth at Work model is built on institutional firm access. Citi negotiates access to present at partner meetings, participate in benefits fairs, and host events for specific firms. This gives you warm leads at scale -- a room full of partners who already know Citi is an approved provider. Your job is to convert those introductions into individual conversations.</p>
+
+        <h3>Internal referrals</h3>
+        <p>Citi is a large bank. Retail bankers, commercial bankers, and investment bankers all touch clients who have personal wealth needs. Building relationships with internal partners -- especially the commercial bank relationship managers who cover accounting firms at the firm level -- generates a consistent stream of referrals. This is one of the most underused sourcing channels by newer bankers.</p>
+
+        <h3>Client referrals</h3>
+        <p>A satisfied client who refers you to a colleague is the highest-quality lead you will ever get. You earn referrals by doing an excellent job, but you also have to ask. The ask is simple: "If you know of any colleagues who might benefit from the kind of planning we've done together, I'd welcome an introduction."</p>
+
+        <h3>COIs (Centers of Influence)</h3>
+        <p>Attorneys, CPAs, and financial planners who work with HNW individuals can be a significant referral source. A tax attorney who works with partners at accounting firms may refer clients to you when a banking or investment need is outside his scope. These relationships take time to build but pay off over years.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Pipeline Management: The Three Questions</div>
+      <div class="prose">
+        <p>For every prospect in your pipeline, you should be able to answer three questions without looking at your CRM:</p>
+        <ul>
+          <li><strong>What is the opportunity?</strong> What product or service would they benefit from, and what is the approximate AUM or revenue attached to it?</li>
+          <li><strong>What is the obstacle?</strong> Why haven't they moved forward? Is it incumbent advisor loyalty, inertia, a pending event, or a knowledge gap?</li>
+          <li><strong>What is the next step?</strong> There must always be a specific, time-bound next action. "Following up" is not a next step. "Sending the SBL proposal by Thursday and calling Friday morning" is a next step.</li>
+        </ul>
+
+        <div class="callout">
+          <div class="callout-label">Common Mistake</div>
+          New bankers let prospects sit in the pipeline without a defined next step. The pipeline becomes a list of hopes rather than a managed process. Every conversation should end with a specific agreement on what happens next and when.
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Qualifying a Prospect</div>
+      <table class="data-table">
+        <thead><tr><th>Criterion</th><th>What You're Assessing</th><th>Green Flag</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Investable Assets</strong></td><td>Do they meet the minimum threshold? ($1M+)</td><td>Senior equity partner, recent capital account payout, multi-year bonus saver</td></tr>
+          <tr><td><strong>Unmet Need</strong></td><td>Is there something the bank can do better than what they have?</td><td>No advisor, incumbent underperforming, compliance restriction unaddressed</td></tr>
+          <tr><td><strong>Willingness to Move</strong></td><td>Are they psychologically open to change?</td><td>Recent life event (divorce, retirement, firm change), expressed dissatisfaction</td></tr>
+          <tr><td><strong>Access</strong></td><td>Can you actually get in front of them?</td><td>Firm partnership, mutual connection, internal referral</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- DISCOVERY -->
+  <div class="page" id="page-discovery">
+    <div class="page-header">
+      <div class="page-tag">Module 05 · Client Management</div>
+      <div class="page-title">Discovery & Needs Analysis</div>
+      <div class="page-intro">The discovery conversation is the most important meeting you will have with a client. Everything that follows -- every proposal, every recommendation -- depends on how well you listen here.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">The Discovery Framework</div>
+      <div class="prose">
+        <h3>Set the context first</h3>
+        <p>Before asking a single question, tell the client what the meeting is for: "My goal today is to understand your situation well enough that I can tell you honestly whether and how Citi can be useful to you. There's no agenda other than that." This disarms the natural defensiveness people feel when they think they're going to be sold to.</p>
+
+        <h3>The seven areas of a complete financial picture</h3>
+        <ul>
+          <li><strong>Income & cash flow:</strong> What does their compensation look like? How is it structured? When do distributions arrive?</li>
+          <li><strong>Assets:</strong> What do they own, and where is it held? What is liquid vs. illiquid?</li>
+          <li><strong>Liabilities:</strong> Mortgage, any other debt? Any guarantees or contingent liabilities from their partnership?</li>
+          <li><strong>Protection:</strong> Life insurance, disability, long-term care? Do they know what their firm provides vs. what they own personally?</li>
+          <li><strong>Tax situation:</strong> Who prepares their taxes? Are they getting proactive planning or just filing?</li>
+          <li><strong>Estate plan:</strong> Do they have a will and trust? When were they last updated? Do they have powers of attorney?</li>
+          <li><strong>Goals & concerns:</strong> What are they trying to accomplish in the next 5 years? What keeps them up at night financially?</li>
+        </ul>
+
+        <div class="callout">
+          <div class="callout-label">Technique</div>
+          You will not get through all seven areas in a first meeting, and that is fine. Your goal is to identify the one or two areas where there is genuine need and pain, and to go deep there. Breadth is for mapping; depth is for connecting.
+        </div>
+
+        <h3>The "ideal outcome" question</h3>
+        <p>At some point in the conversation, ask: "If we were sitting here three years from now and everything had gone the way you hoped, what would be different about your financial situation?" This question cuts through the surface conversation and reveals what a client actually cares about. The answer will guide every subsequent recommendation you make.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Listening Disciplines</div>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">🤫</div>
+          <div class="card-title">Silence is productive</div>
+          <div class="card-body">After a client answers a question, count to three silently before responding. Clients often add the most important information in the pause after their first answer.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔁</div>
+          <div class="card-title">Reflect before proposing</div>
+          <div class="card-body">Summarize what you heard before suggesting anything. "What I'm hearing is that your main concern is what happens at retirement in 8 years -- is that right?" This builds trust and confirms you understood correctly.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">📝</div>
+          <div class="card-title">Take notes visibly</div>
+          <div class="card-body">Taking notes signals that what the client is saying matters. It also forces you to listen rather than rehearse your next pitch. Write the call report within 24 hours while detail is fresh.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RELATIONSHIPS -->
+  <div class="page" id="page-relationships">
+    <div class="page-header">
+      <div class="page-tag">Module 06 · Client Management</div>
+      <div class="page-title">Deepening Relationships</div>
+      <div class="page-intro">Acquiring a client is the beginning, not the goal. The value of a private banking relationship compounds over years as trust deepens and you become involved in more dimensions of their financial life.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">The Relationship Depth Model</div>
+      <div class="prose">
+        <h3>Level 1: Single product</h3>
+        <p>The client uses Citi for one thing -- typically a brokerage account or a mortgage. They think of you as a service provider. Vulnerability to a competitor who offers a slightly better rate is high.</p>
+
+        <h3>Level 2: Multi-product</h3>
+        <p>The client has investments, banking, and perhaps a credit facility with you. Switching cost is now real. They think of you as their banker. You have regular contact and reasonable loyalty.</p>
+
+        <h3>Level 3: Trusted advisor</h3>
+        <p>The client calls you before making major financial decisions -- before buying a property, before taking a loan, before changing their estate plan. You know their whole picture. Competitors rarely penetrate this relationship because the trust cost of switching is too high. This is where you want every client to be eventually.</p>
+
+        <div class="callout">
+          <div class="callout-label">Key Practice</div>
+          The fastest way to deepen a relationship is to add value when you are not asking for anything. A market insight, a relevant article, a tax planning reminder before a deadline -- these touches between transactions are what build the trusted advisor status.
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">The Annual Client Review</div>
+      <div class="prose">
+        <h3>What it is</h3>
+        <p>Once a year, you sit down with every client for a comprehensive review. This is not a portfolio performance review (your Investment Counselor handles that). It is a holistic life review -- what has changed, what is coming, and whether the bank's strategy still fits.</p>
+
+        <h3>The annual review agenda</h3>
+        <ul>
+          <li>What changed in the past year? (New partner, divorce, child entering college, parent needing care, change at the firm)</li>
+          <li>Are we still aligned on your goals? Have priorities shifted?</li>
+          <li>Review the complete balance sheet: assets, liabilities, protection, estate plan</li>
+          <li>Are there areas where you are exposed or underserved?</li>
+          <li>What is the single most important financial priority for the coming year?</li>
+        </ul>
+
+        <h3>Between annual reviews</h3>
+        <p>You should be in meaningful contact with every client at least quarterly -- a market update call, a relevant insight, a check-in around a known event in their calendar. Some clients want more frequent contact; others prefer to be left alone until something matters. Know which type each client is and honor that preference.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BANKING & LENDING -->
+  <div class="page" id="page-banking">
+    <div class="page-header">
+      <div class="page-tag">Module 07 · Products & Solutions</div>
+      <div class="page-title">Banking & Lending</div>
+      <div class="page-intro">Credit is one of the most powerful tools in private banking. Understanding how to use leverage intelligently -- and knowing when not to -- is essential to client service.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Securities-Backed Lending (SBL)</div>
+      <div class="prose">
+        <h3>What it is</h3>
+        <p>A revolving line of credit secured by the client's investment portfolio. The client pledges eligible securities (typically equities, fixed income, mutual funds) as collateral. Citi advances a percentage of the portfolio value -- typically 50-90% depending on the asset class -- as a credit line the client can draw on.</p>
+
+        <h3>Why clients use it</h3>
+        <ul>
+          <li>Bridge liquidity needs without selling appreciated securities (which would trigger capital gains)</li>
+          <li>Fund a real estate purchase, renovation, or business opportunity</li>
+          <li>Cover large one-time expenses (tax payments, tuition, legal fees)</li>
+          <li>Create leverage for additional investment</li>
+        </ul>
+
+        <h3>The maintenance call risk</h3>
+        <p>If the portfolio declines and the loan-to-value ratio breaches a threshold, the client receives a maintenance call -- they must either deposit additional assets or repay a portion of the line. This is the primary risk of SBL that must be explained clearly. Clients who use SBL to invest in volatile assets are taking on amplified risk.</p>
+
+        <div class="callout">
+          <div class="callout-label">Key Conversation Point</div>
+          SBL is most appropriate as a liquidity tool for short-term needs against a diversified portfolio -- not as permanent leverage against a concentrated position. Know the difference and counsel accordingly.
+        </div>
+
+        <h3>The tax planning angle</h3>
+        <p>For clients with large unrealized gains, SBL is often framed as a "borrow, don't sell" strategy. Instead of selling Apple stock at a $2M gain and paying $400K+ in taxes, the client borrows against it. The borrowing proceeds are not taxable income. The tax deferral benefit must be weighed against the carrying cost of the loan.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Bespoke Mortgage Lending</div>
+      <div class="prose">
+        <h3>Why HNW mortgages are different</h3>
+        <p>Standard mortgage underwriting is built for W-2 earners with predictable paychecks. A partner with $2M in K-1 income looks confusing to a standard underwriter -- the income is lumpy, the tax returns show large write-offs, and the partnership structure is complex. Private bank mortgage lending is underwritten holistically, looking at the total balance sheet rather than just income documentation.</p>
+
+        <h3>Jumbo and super-jumbo mortgages</h3>
+        <p>Properties over $1M require jumbo mortgage financing (above conforming loan limits). Private bank jumbo mortgages often carry more competitive rates than retail mortgages for the same amount because the private bank is capturing the entire relationship. The mortgage is often priced as a relationship rate -- meaning the rate improves if the client also keeps investments or deposits at the bank.</p>
+
+        <h3>The cross-sell opportunity</h3>
+        <p>A mortgage is often the best way to start a relationship that later grows into full wealth management. A new partner buying their first home in New York is an ideal prospect -- they have a real need, a reason to engage, and years of wealth accumulation ahead.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Other Credit Products</div>
+      <table class="data-table">
+        <thead><tr><th>Product</th><th>Use Case</th><th>Key Consideration</th></tr></thead>
+        <tbody>
+          <tr><td><strong>HELOC</strong></td><td>Flexible line secured by home equity</td><td>Variable rate; good for recurring liquidity needs</td></tr>
+          <tr><td><strong>Capital Call Line</strong></td><td>Bridge financing for PE/fund capital calls between distributions</td><td>Short-term; must be repaid from fund distributions</td></tr>
+          <tr><td><strong>Art / Collectibles Lending</strong></td><td>Credit secured by fine art or other collectibles</td><td>Illiquid collateral; lower advance rates</td></tr>
+          <tr><td><strong>Custom Credit Structures</strong></td><td>Bespoke solutions for complex situations (e.g., secured by partnership interests)</td><td>Requires credit committee approval; longer timeline</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- INVESTMENTS -->
+  <div class="page" id="page-investments">
+    <div class="page-header">
+      <div class="page-tag">Module 08 · Products & Solutions</div>
+      <div class="page-title">Investments & Alternatives</div>
+      <div class="page-intro">You are not a portfolio manager -- but you need to know enough about investments to have intelligent conversations, identify needs, and bring the right specialist into the room.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Discretionary vs. Advisory Management</div>
+      <div class="prose">
+        <h3>Discretionary management</h3>
+        <p>Under a discretionary mandate, Citi's investment team manages the portfolio without requiring client approval for individual trades. The client sets the investment policy statement (risk tolerance, objectives, constraints) and the Investment Counselor executes. This is the preferred model for accounting firm partners with independence restrictions -- the client is not making individual security selections, so there is no pre-clearance requirement.</p>
+
+        <h3>Advisory management</h3>
+        <p>Under an advisory relationship, Citi recommends investments but the client approves each trade. This gives the client more control but requires their time and attention. It also creates compliance complexity for partners with independence restrictions, since they are technically making investment decisions.</p>
+
+        <div class="callout">
+          <div class="callout-label">For Accounting Firm Clients</div>
+          Always position discretionary management as the compliance solution first, investment management second. The compliance argument is immediate and visceral. The investment argument requires more work to win.
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Concentrated Position Management</div>
+      <div class="prose">
+        <h3>The problem</h3>
+        <p>A client with a large position in a single stock -- often an employer stock grant, an inherited position, or a long-held investment -- faces concentration risk. If that stock declines 50%, their net worth is devastated. Yet selling creates a large capital gains tax event they want to avoid.</p>
+
+        <h3>The solutions toolkit</h3>
+        <ul>
+          <li><strong>Gradual systematic selling:</strong> Sell a fixed dollar amount or percentage over time to average out the price and spread the tax liability across years</li>
+          <li><strong>Exchange funds:</strong> Pool the concentrated position with other investors' concentrated positions into a diversified fund; defers gain recognition for 7 years</li>
+          <li><strong>Protective puts / collars:</strong> Options strategies that limit downside while retaining upside; used when the client wants to hold but needs protection</li>
+          <li><strong>Charitable structures:</strong> Donate appreciated shares to a DAF or CRT -- the client avoids capital gains, gets a charitable deduction, and the trust can sell and reinvest in a diversified portfolio</li>
+          <li><strong>SBL:</strong> Borrow against the position to create liquidity without selling; defers the tax event indefinitely (but creates maintenance call risk)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Alternative Investments</div>
+      <table class="data-table">
+        <thead><tr><th>Category</th><th>What It Is</th><th>Why Clients Want It</th><th>Key Risk</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Private Equity</strong></td><td>Funds investing in private companies (buyout, growth, venture)</td><td>Higher long-term returns vs. public markets; diversification</td><td>Illiquidity; capital calls; vintage year risk</td></tr>
+          <tr><td><strong>Hedge Funds</strong></td><td>Actively managed funds using diverse strategies (long/short, macro, event-driven)</td><td>Non-correlated returns; downside protection</td><td>High fees; liquidity restrictions; manager selection risk</td></tr>
+          <tr><td><strong>Private Credit</strong></td><td>Direct lending to private companies (senior secured, mezzanine, distressed)</td><td>Income generation; floating rate; diversification from fixed income</td><td>Credit risk; illiquidity; complex documentation</td></tr>
+          <tr><td><strong>Real Assets</strong></td><td>Infrastructure, timberland, farmland, real estate funds</td><td>Inflation hedge; cash yield; diversification</td><td>Illiquidity; cyclicality; operator execution risk</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:14px" class="callout">
+        <div class="callout-label">Suitability Reminder</div>
+        Alternatives are appropriate only for clients who meet the Qualified Purchaser or Accredited Investor threshold, understand illiquidity, and have sufficient liquid assets outside the alternative allocation. Always involve the Alternatives Specialist and ensure suitability documentation is complete.
+      </div>
+    </div>
+  </div>
+
+  <!-- WEALTH PLANNING -->
+  <div class="page" id="page-planning">
+    <div class="page-header">
+      <div class="page-tag">Module 09 · Products & Solutions</div>
+      <div class="page-title">Wealth Planning</div>
+      <div class="page-intro">Wealth planning conversations are where the deepest client relationships are built. Understanding the major structures and when to raise them separates average bankers from exceptional ones.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Estate Planning Fundamentals</div>
+      <div class="prose">
+        <h3>The federal estate tax context</h3>
+        <p>As of 2025, the federal estate tax exemption is approximately $13.6 million per individual ($27.2M per married couple). Amounts above that threshold are taxed at 40%. This exemption is scheduled to sunset at the end of 2025 without congressional action, which means clients with estates approaching or exceeding $7-10M should be doing planning now to lock in the higher exemption.</p>
+
+        <h3>The basic structures your clients need to know about</h3>
+        <ul>
+          <li><strong>Revocable Living Trust:</strong> Allows assets to pass outside of probate; the grantor retains control during life. This is the baseline for any serious estate plan.</li>
+          <li><strong>GRAT (Grantor Retained Annuity Trust):</strong> Client transfers assets to a trust, receives an annuity for a term, and any appreciation above the IRS hurdle rate passes to heirs tax-free. Ideal in low-rate environments or with high-growth assets.</li>
+          <li><strong>SLAT (Spousal Lifetime Access Trust):</strong> Irrevocable trust that benefits the spouse during their lifetime but removes assets from the taxable estate. Allows couples to use the current high exemption while maintaining indirect access.</li>
+          <li><strong>IDGT (Intentionally Defective Grantor Trust):</strong> A trust that is outside the estate for estate tax purposes but inside it for income tax purposes. The grantor pays income tax on trust earnings, which is itself a tax-free gift to beneficiaries -- effectively additional wealth transfer.</li>
+          <li><strong>DAF (Donor Advised Fund):</strong> Client makes an irrevocable contribution (getting an immediate deduction), then grants from the fund to charities over time. Excellent for bunching charitable deductions in high-income years.</li>
+        </ul>
+
+        <div class="callout">
+          <div class="callout-label">Your Role</div>
+          You do not design estate plans -- the Wealth Planning Specialist does. Your role is to recognize when a client needs a planning conversation and to open that door. The trigger questions: "Do you have an estate plan in place? When was it last reviewed? Do you have any charitable goals?"
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Insurance in Wealth Planning</div>
+      <div class="prose">
+        <h3>Why HNW clients need to think about insurance differently</h3>
+        <p>For most people, life insurance is income replacement. For HNW clients, life insurance is an estate planning tool -- specifically, a way to provide liquidity to pay estate taxes or to fund an ILIT (Irrevocable Life Insurance Trust) that removes the death benefit from the taxable estate entirely.</p>
+
+        <h3>Disability insurance</h3>
+        <p>A partner earning $1M a year has a human capital asset worth $15-20M over their remaining career. If they become disabled and cannot work, that asset disappears. Group disability policies at most firms cover a fraction of actual income (because they cap at a dollar amount that underrepresents partner distributions). Understanding the gap is often an eye-opening conversation.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACCOUNTING FIRM CLIENTS -->
+  <div class="page" id="page-accounting">
+    <div class="page-header">
+      <div class="page-tag">Module 10 · Products & Solutions</div>
+      <div class="page-title">Accounting Firm Clients</div>
+      <div class="page-intro">This is your primary market segment. Going deep here -- beyond what most bankers know -- is what creates sustained competitive advantage in the Wealth at Work Professional Services Group.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">The Accounting Profession Landscape</div>
+      <div class="prose">
+        <h3>The PE consolidation wave</h3>
+        <p>Since 2022, private equity has been acquiring minority stakes in large accounting firms at scale. Firms like Grant Thornton (New Mountain Capital), EY's advisory spinoff, BDO, and others have taken on PE backing. This is a structural transformation of the profession with significant wealth implications for partners.</p>
+        <p>When PE buys into a firm, partners who held equity stakes receive liquidity -- often the largest single check of their professional lives. This creates an immediate and urgent wealth management need: a partner who was worth $3M on paper is now holding $3M in cash. Where does that go?</p>
+
+        <h3>Alternative Practice Structures (APS)</h3>
+        <p>Because SEC independence rules prohibit non-CPAs from owning the attest (audit) practice, PE deals are structured around Alternative Practice Structures. The advisory/consulting arm of the firm is owned by a PE-backed entity. The attest practice remains CPA-owned but has a management services agreement with the PE entity. Partners bifurcate their equity between the two structures, creating complex K-1 income from multiple entities.</p>
+
+        <h3>What this means for partners as clients</h3>
+        <ul>
+          <li>Liquidity events that require immediate planning and deployment</li>
+          <li>Rollover equity in the PE-backed structure (illiquid, complex valuation)</li>
+          <li>Potential acceleration of mandatory retirement and capital account payouts</li>
+          <li>Increased income complexity -- multiple K-1s, potential carried interest</li>
+          <li>Questions about what independence rules apply to the non-attest practice vs. the attest practice</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Partner Compensation Mechanics</div>
+      <div class="prose">
+        <h3>Equity vs. income partners</h3>
+        <p>Not all partners are equal. Income partners (sometimes called non-equity partners) receive a salary-like draw -- typically W-2 or a fixed K-1 -- and do not have capital accounts or ownership stakes. Equity partners hold actual ownership, receive variable K-1 distributions tied to firm profitability, and contribute capital to the firm. Your primary target is equity partners.</p>
+
+        <h3>The capital account</h3>
+        <p>When a CPA becomes an equity partner, they contribute capital to the firm -- often $200K to $1M funded through a partner loan or direct contribution. This capital account grows over their tenure as retained earnings accumulate. At mandatory retirement, the firm returns this capital account over a defined payout period (often 5-10 years). Planning for the tax implications and investment of these proceeds is a core need.</p>
+
+        <h3>The K-1 income pattern</h3>
+        <p>Partner K-1 income is paid in draws throughout the year, with a "true-up" distribution at fiscal year end when the firm finalizes its profitability. This creates lumpiness -- a partner may receive a large distribution in Q1 for the prior year. Understanding this timing is critical for cash flow planning and for knowing when to have the investment conversation.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Independence Rules: The Full Picture</div>
+      <table class="data-table">
+        <thead><tr><th>Rule Source</th><th>What It Restricts</th><th>Implication for Banking</th></tr></thead>
+        <tbody>
+          <tr><td><strong>AICPA Code of Professional Conduct</strong></td><td>Direct financial interest in audit clients; loans from audit clients</td><td>Partners cannot hold securities of firm's audit clients</td></tr>
+          <tr><td><strong>SEC / PCAOB Rules</strong></td><td>Stricter version for public company audit clients; covers covered persons and their immediate families</td><td>Citi's discretionary management removes individual security selection from partner -- key compliance argument</td></tr>
+          <tr><td><strong>Firm-Level Policies</strong></td><td>Each firm layers on additional restrictions beyond AICPA/SEC minimums</td><td>Big 4 policies vary; always understand the specific firm's policy</td></tr>
+          <tr><td><strong>The "covered persons" scope</strong></td><td>Independence rules cover not just the engagement partner but all partners in the practice office and senior staff on the engagement</td><td>A broader set of professionals at each firm are restricted than they may realize</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SCENARIOS -->
+  <div class="page" id="page-scenarios">
+    <div class="page-header">
+      <div class="page-tag">Module 11 · Execution</div>
+      <div class="page-title">Real Client Scenarios</div>
+      <div class="page-intro">The job is learned through situations, not lectures. Work through each scenario as if you were the banker on the call. Think about what you would say, what you would ask, and what the next steps are.</div>
+    </div>
+
+    <div class="section">
+      <div class="scenario">
+        <div class="scenario-header">
+          <div>
+            <div class="scenario-tag">Scenario 01 · New Partner</div>
+            <div class="scenario-title">Just made equity partner at a Big 4 firm. First real wealth conversation.</div>
+          </div>
+        </div>
+        <div class="scenario-body">
+          <p><strong>Client:</strong> Maria, 38, just made equity partner at Deloitte. She earns approximately $650K in total compensation this year, expects $900K+ next year as she ramps up her partner draw. She has $280K in her 401(k), a $400K mortgage on a condo, and roughly $150K in a retail brokerage account she hasn't looked at in years. She mentions she "feels like she should be doing more" but doesn't know where to start.</p>
+          <div class="response-block">
+            <div class="response-label">How you approach this</div>
+            <p>First, acknowledge the milestone -- becoming equity partner is a major inflection point and she should feel good about that. Then ask the discovery question: "Now that your financial picture is changing significantly, what are the two or three things you most want to get right in the next few years?" Listen.</p>
+            <p>Her situation has three immediate needs you should identify: (1) her existing retail brokerage account may hold restricted securities that now violate her independence obligations -- this is urgent; (2) she will need a cash flow plan for the capital contribution she likely needs to make to the firm's partnership; (3) her compensation now requires estimated quarterly tax payments. These are specific, real problems you can help with today.</p>
+            <p>Do not pitch a full wealth management proposal in this first meeting. Identify the most urgent problem (likely the independence/compliance issue), solve it, and schedule a second meeting to do a full financial review.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="scenario">
+        <div class="scenario-header">
+          <div>
+            <div class="scenario-tag">Scenario 02 · Retirement Transition</div>
+            <div class="scenario-title">Senior partner 2 years from mandatory retirement. Capital account payout imminent.</div>
+          </div>
+        </div>
+        <div class="scenario-body">
+          <p><strong>Client:</strong> Richard, 59, senior partner at a regional accounting firm. Mandatory retirement at 62. He has approximately $1.8M in his capital account, which the firm will return over 5 years post-retirement. He has $2.2M in a managed account at Merrill Lynch, a paid-off home worth $1.5M, and a vacation property with $300K remaining on the mortgage. His wife does not work. He has no formal estate plan.</p>
+          <div class="response-block">
+            <div class="response-label">How you approach this</div>
+            <p>Richard has a time-sensitive situation and probably doesn't fully realize it. The estate tax exemption sunset (post-2025) means this is a critical planning window. His total estate -- roughly $5.5M+ -- is approaching the point where planning now could save substantial taxes if the exemption drops.</p>
+            <p>Lead with the question: "Have you and your wife done any planning around the transition at 62? I ask because there's a window right now that a lot of our clients are using strategically." This opens the estate planning conversation without being morbid.</p>
+            <p>Then cover: capital account payout structure and reinvestment plan; income replacement strategy post-retirement; health insurance continuity (large gap between 62 and Medicare at 65); estate planning review with our Wealth Planning Specialist. The Merrill relationship is not the first battle -- the planning engagement is, because it positions you as his advisor of record for the transition.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="scenario">
+        <div class="scenario-header">
+          <div>
+            <div class="scenario-tag">Scenario 03 · PE Liquidity Event</div>
+            <div class="scenario-title">Firm just took PE investment. Partner received $2.5M liquidity check.</div>
+          </div>
+        </div>
+        <div class="scenario-body">
+          <p><strong>Client:</strong> James, 47, equity partner at a mid-market accounting firm that just closed a PE deal with a financial sponsor. He received $2.5M in cash for a portion of his equity and retained rollover equity in the new structure worth approximately $1M (illiquid). He currently has no private bank relationship. His firm HR team gave him your card at a benefits briefing.</p>
+          <div class="response-block">
+            <div class="response-label">How you approach this</div>
+            <p>This is an inbound lead at a moment of peak financial complexity and anxiety. James has more money than he has ever held in cash, he is uncertain about what the PE deal means for his future at the firm, and he is being contacted by many financial advisors simultaneously. Speed and calm authority are your competitive advantages.</p>
+            <p>Your first call is not a pitch. It is an orientation: "I know you're being pulled in a lot of directions right now. My goal in this first conversation is just to understand your situation and tell you what questions you should be asking -- regardless of whether we work together." This positioning differentiates you immediately.</p>
+            <p>Key questions for James: What are the tax implications of the PE payout? (The cash is likely ordinary income or capital gain -- he needs clarity on this before doing anything with it.) What are the terms of his rollover equity? Does he have a financial plan that accounts for this new reality? The $2.5M needs a home. A diversified investment plan with an SBL facility for liquidity needs is the core proposal.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPLIANCE -->
+  <div class="page" id="page-compliance">
+    <div class="page-header">
+      <div class="page-tag">Module 12 · Execution</div>
+      <div class="page-title">Compliance & Ethics</div>
+      <div class="page-intro">Private banking operates under extensive regulatory oversight. Understanding the rules that govern your conduct is not optional -- a compliance failure can end your career.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Know Your Customer (KYC) & AML</div>
+      <div class="prose">
+        <h3>What it is</h3>
+        <p>Before opening any account, you are required to verify the client's identity and understand the source of their wealth. Anti-Money Laundering (AML) regulations require banks to monitor for and report suspicious activity. As the banker, you are the first line of defense.</p>
+
+        <h3>In practice</h3>
+        <p>Every new client requires a KYC package: identity documents, source of wealth documentation, and a risk assessment. For professional services clients, source of wealth is typically straightforward (K-1 income, capital account payout, home sale). The documentation burden is real but not onerous for this client segment. Never onboard a client without completing this process.</p>
+
+        <div class="callout">
+          <div class="callout-label">Red Flag</div>
+          A client who is reluctant to document their source of wealth, wants to move cash quickly in unusual patterns, or has connections to high-risk jurisdictions requires escalation to your compliance team immediately. Do not try to solve compliance concerns yourself.
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Suitability & Fiduciary Standards</div>
+      <div class="prose">
+        <h3>Suitability</h3>
+        <p>Any investment recommendation you make (or facilitate) must be suitable for the client based on their stated risk tolerance, time horizon, financial situation, and investment objectives. This is documented in the Investment Policy Statement. If a client wants to do something unsuitable, you document the conversation and in some cases decline to execute.</p>
+
+        <h3>Fiduciary context</h3>
+        <p>Under a discretionary investment management agreement, Citi acts as a fiduciary -- meaning the bank must act in the client's best interest, not merely recommend suitable products. This is a higher standard. Understand when your relationship is advisory (suitability) vs. discretionary (fiduciary) and conduct yourself accordingly.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Gift & Entertainment Rules</div>
+      <div class="prose">
+        <p>Banks maintain strict limits on gifts and entertainment given to clients and received from third parties. The limits, reporting requirements, and pre-approval thresholds are defined in Citi's specific policies (which you will receive in compliance training). The general principle: anything that could be perceived as influencing a client's decision or your objectivity is subject to scrutiny. When in doubt, ask compliance before acting.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Licensing Requirements</div>
+      <div class="prose">
+        <p>As an Associate Banker who provides investment advice and executes securities transactions, you will be required to hold the Series 7 (General Securities Representative) and Series 66 (Uniform Combined State Law Examination). The Series 7 must be completed before you can discuss investment recommendations with clients independently. The Series 66 co-requisite means passing the 7 first is the right sequencing. Treat the licensing timeline as a day-one priority.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- METRICS -->
+  <div class="page" id="page-metrics">
+    <div class="page-header">
+      <div class="page-tag">Module 13 · Execution</div>
+      <div class="page-title">How You're Measured</div>
+      <div class="page-intro">Understanding your performance metrics from day one lets you prioritize your time correctly. Private banking is a revenue business, but the inputs that drive revenue are activity, relationships, and product breadth.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">The Primary Metrics</div>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">💰</div>
+          <div class="card-title">Revenue / Net Revenue</div>
+          <div class="card-body">The primary bottom-line metric. Revenue is generated from investment management fees (AUM-based), net interest income from loans, transaction fees, and planning fees. You are expected to grow this number year over year.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">📈</div>
+          <div class="card-title">AUM Growth</div>
+          <div class="card-body">Total assets under management and advisement in your book. Growing AUM through new clients and expanding existing relationships is the primary driver of long-term revenue growth. New money is tracked separately from market appreciation.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🆕</div>
+          <div class="card-title">New Client Acquisition</div>
+          <div class="card-body">Number and quality of new clients onboarded. For Associate Bankers, this is an important signal of pipeline development capability. Minimum AUM thresholds define what counts as a qualifying new relationship.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔗</div>
+          <div class="card-title">Product Penetration</div>
+          <div class="card-body">What percentage of your clients use more than one product? Multi-product clients are stickier, more valuable, and a signal of relationship depth. Tracked as number of products per household.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">📞</div>
+          <div class="card-title">Activity Metrics</div>
+          <div class="card-body">Calls made, meetings held, proposals sent. These are leading indicators of future revenue. As a newer banker, you will be held to activity targets until your book generates its own momentum.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">⭐</div>
+          <div class="card-title">Client Satisfaction</div>
+          <div class="card-body">Net Promoter Score surveys and qualitative feedback from client reviews. A dissatisfied client is an attrition risk. A highly satisfied client is a referral source.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">How a Strong First Year Looks</div>
+      <div class="prose">
+        <h3>The right mindset</h3>
+        <p>Your first year is an investment period. You will not build a significant book in 12 months. What you will do -- and what your manager is watching for -- is whether you are building the right habits: consistent activity, deep discovery conversations, early product wins, and a growing pipeline of qualified prospects.</p>
+
+        <h3>Specific priorities</h3>
+        <ul>
+          <li>Complete Series 7 and Series 66 as fast as possible -- you cannot do the full job without them</li>
+          <li>Shadow senior bankers in every client meeting you can get into; debrief every meeting afterward</li>
+          <li>Identify the 10 best prospects in your assigned coverage territory and develop a specific plan for each one</li>
+          <li>Win at least 2-3 new client relationships of your own, even if modest in size; the practice of closing is itself the skill</li>
+          <li>Become genuinely expert in accounting firm industry dynamics -- read the profession's trade press, understand the PE deals, know the major firm names and their structures</li>
+        </ul>
+
+        <div class="callout">
+          <div class="callout-label">Long Game</div>
+          The bankers who build the best books over a decade are the ones who prioritize trust over transactions in the early years. A client who trusts you completely is worth 10x a client who uses you transactionally. Play the long game from day one.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const pages = ['overview','clients','day','prospecting','discovery','relationships','banking','investments','planning','accounting','scenarios','compliance','metrics'];
+  const visited = new Set(['overview']);
+
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if (n.getAttribute('onclick') === `showPage('${id}')`) n.classList.add('active');
+    });
+    visited.add(id);
+    updateProgress();
+    if (window.innerWidth <= 768) {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('overlay').classList.remove('open');
+    }
+    window.scrollTo(0,0);
+  }
+
+  function updateProgress() {
+    const total = pages.length;
+    const count = visited.size;
+    document.getElementById('progress-fill').style.width = (count/total*100) + '%';
+    document.getElementById('progress-count').textContent = count + ' / ' + total;
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('open');
+  }
+
+  // Checklist interactivity
+  document.querySelectorAll('.checklist li').forEach(li => {
+    li.addEventListener('click', () => {
+      const box = li.querySelector('.check-box');
+      const text = li.querySelector('.check-text');
+      box.classList.toggle('checked');
+      text.classList.toggle('checked');
+    });
+  });
+</script>
+
+</body>
+</html>
